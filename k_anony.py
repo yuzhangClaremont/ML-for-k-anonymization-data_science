@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 
-# adult_data = pd.read_csv("adult_with_pii.csv")
+adult_data = pd.read_csv("adult_with_pii.csv")
 
 
 ## De-identification
@@ -14,14 +14,14 @@ import numpy as np
 # print(adult_anon.describe()) # 32561 people
 
 # adult_anon = adult_data.copy()
-# adult_anon = adult_anon[200:]
+# adult_anon = adult_anon[200:]    # from 200 to 35361
 # adult_anon ['Name'] = '*'
 # adult_anon ['SSN'] = '*'
 # # print(adult_anon.describe(),'/n !!!!') # 32361 people
 # adult_anon.to_csv(r'anon.csv',index=False)
 
 # ## PII only
-# pii = adult_data[['Name', 'DOB', 'SSN', 'Zip']]
+pii = adult_data[['Name', 'DOB', 'SSN', 'Zip']]
 # pii_flawed = pii.drop(range(100))
 
 # ## Generate 10000 Personal Identifiable data
@@ -29,24 +29,20 @@ import numpy as np
 
 # # print(pii.describe())
 # # print(pii10000.head())
-# pii10000.to_csv(r'attack.csv',index=False)
+# pii10000.to_csv(r'attack.csv',index=False)  # from 142 to 10142 so 10142 - 200 = 9942 overlap
 
 
 ## Question 1: among 32361 people from anonmous data anon.csv, how many of them can be uniquely identified with 
 # date-of-birth and zipcode?
 # read anon data
 anon = pd.read_csv("anon.csv")
-print(anon.head())
+
 
 # combine two columns into a new dataframe of strings
 sythesized = anon['DOB'] + anon['Zip'].map(str)
-print(sythesized.head())
+# print(sythesized.head())
 # count unique data
 print( sythesized.value_counts()[ sythesized.value_counts()== 1].size )# 32359 can be identified in 32361 people
-# s = []
-# for row in anon.itertuples():
-#     s.append((row.DOB, row.Zip))
-# print(len(s), len(set(s)))
 
 
 
@@ -55,18 +51,65 @@ print( sythesized.value_counts()[ sythesized.value_counts()== 1].size )# 32359 c
 # 
 # read attack data
 attack_data = pd.read_csv("attack.csv")
+# print(anon.head())
 # print(attack_data.head())
 
-anon_h = anon[142:147]
-attack_h = attack_data.head()
-print(anon_h)
-print(attack_h)
-res = pd.merge(anon[['Name', 'DOB', 'SSN', 'Zip']],
+# test
+# anon_h = adult_data.head()
+# pii_head = pii.head(3)
+# pii_head.iloc[0,2] = '000-000-0000'
+# pii_head.iloc[0,1] = '0/0/0000'
+# attack_h = attack_data.head()
+# print(anon_h)
+# print(pii_head)
+# res = pd.merge(anon_h[['Name', 'DOB', 'SSN', 'Zip']],
+#                 pii_head, 
+#                 on = ['Zip', 'DOB'],
+#                 how = 'right') # merge if zip or dob same
+#/test
+
+# res = pd.merge(
+#                 attack_data, 
+#                 anon[['Name', 'DOB', 'SSN', 'Zip']],
+#                 on = 'Zip') # merge if zip or dob same
+
+# Out of 10000 attack data, 9941 of them can be identified in the anonmous data
+res2 = pd.merge(
                 attack_data, 
-                on = ['Zip', 'DOB'])
-print( '!!!',res )
+                anon[['Name', 'DOB', 'SSN', 'Zip']],
+                on = ['DOB','Zip']) 
+# print( res2 )
+
+# Question 3 In this cell, write code to implement 'is_k_anonymous'
+
+def is_k_anonymous(k, df):
+    count = 0
+    for index, row in df.iterrows():
+        for index_c, compare_row in df.iterrows():
+            if row.equals(compare_row):
+                count += 1
+            # print(row)
+            # print(count, '!!!!!')
+        if count < k:
+            return False
 
 
+    return True
+
+print(is_k_anonymous(2, anon))
+
+two_anon = pd.DataFrame(
+    [
+        ['*', 'Storm',34,'Black'],
+        ['John','*','*','*'],
+        ['*', 'Storm',34,'Black'],
+        ['John','*','*','*']
+    ],
+    columns = ['First','Last','age','race']
+)
+
+print(two_anon)
+print(is_k_anonymous(2, two_anon))
 
 
 # Some birthdates occur more than once
