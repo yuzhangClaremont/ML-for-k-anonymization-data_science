@@ -32,24 +32,40 @@ import numpy as np
 # pii10000.to_csv(r'attack.csv',index=False)
 
 
-## Question 1: among 32561 people from anonmous data anon.csv, how many of them can be uniquely identified with 
+## Question 1: among 32361 people from anonmous data anon.csv, how many of them can be uniquely identified with 
 # date-of-birth and zipcode?
 # read anon data
 anon = pd.read_csv("anon.csv")
-print(anon.describe())
+print(anon.head())
 
 # combine two columns into a new dataframe of strings
 sythesized = anon['DOB'] + anon['Zip'].map(str)
 print(sythesized.head())
 # count unique data
 print( sythesized.value_counts()[ sythesized.value_counts()== 1].size )# 32359 can be identified in 32361 people
+# s = []
+# for row in anon.itertuples():
+#     s.append((row.DOB, row.Zip))
+# print(len(s), len(set(s)))
 
-## Question 2: with a list of 10000 attact data of Name, SSN, DOB, Zip, identify the people's name and ssn
+
+
+## Question 2: with a list of 10000 attack data of Name, SSN, DOB, Zip, identify the people's name and ssn
 # that is anonmous in anon.csv
 # 
 # read attack data
 attack_data = pd.read_csv("attack.csv")
-print(attack_data.head())
+# print(attack_data.head())
+
+anon_h = anon[142:147]
+attack_h = attack_data.head()
+print(anon_h)
+print(attack_h)
+res = pd.merge(anon[['Name', 'DOB', 'SSN', 'Zip']],
+                attack_data, 
+                on = ['Zip', 'DOB'])
+print( '!!!',res )
+
 
 
 
@@ -57,9 +73,9 @@ print(attack_data.head())
 # print( attack_data['DOB'].value_counts().head(n=20) )
 
 # Some zip codes occur more than once
-print( attack_data['Zip'].value_counts()[ attack_data['Zip'].value_counts()== 1].size) # 9069 can be identified
+# print( attack_data['Zip'].value_counts()[ attack_data['Zip'].value_counts()== 1].size) # 9069 can be identified
 
-print( attack_data['DOB'].value_counts()[ attack_data['DOB'].value_counts()== 1].size) # 6431 can be identified
+# print( attack_data['DOB'].value_counts()[ attack_data['DOB'].value_counts()== 1].size) # 6431 can be identified
 
 
 
