@@ -96,7 +96,7 @@ def is_k_anonymous(k, df):
 
     return True
 
-print(is_k_anonymous(2, anon))
+# print(is_k_anonymous(2, anon))
 
 two_anon = pd.DataFrame(
     [
@@ -108,8 +108,16 @@ two_anon = pd.DataFrame(
     columns = ['First','Last','age','race']
 )
 
-print(two_anon)
-print(is_k_anonymous(2, two_anon))
+# print(two_anon)
+# print(is_k_anonymous(2, two_anon))
+
+# Question 4
+# Implement a function make_k_anonymous that makes the given dataframe k-Anonymous for a given k. Your solution 
+# should be able to anonymize the adult_anon dataframe so that your implementation of is_k_anonymous returns True.
+
+print(anon.head())
+def make_k_anonymous(k, iqs, df):
+    return "undefined"
 
 
 # Some birthdates occur more than once
