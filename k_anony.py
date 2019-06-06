@@ -51,8 +51,8 @@ print( sythesized.value_counts()[ sythesized.value_counts()== 1].size )# 32359 c
 # 
 # read attack data
 attack_data = pd.read_csv("attack.csv")
-# print(anon.head())
-# print(attack_data.head())
+print(anon.head())
+print(attack_data.head())
 
 # test
 # anon_h = adult_data.head()
@@ -80,14 +80,20 @@ res2 = pd.merge(
                 on = ['DOB','Zip']) 
 # print( res2 )
 
-# Question 3 In this cell, write code to implement 'is_k_anonymous'
+# Question 3 In this cell, write code to implement 'is_k_anonymous'. This function has three arguments.
+#       k is coeficient of k-anonymity, df is the dataframe testing on, pii is a list of personal identifiable 
+#       column names that may lead to violating k-anonymity. Your runtime should be considerably short.
 
-def is_k_anonymous(k, df):
+def is_k_anonymous(k, df, pii):
+    df_pii = df.loc[:,pii]
+    # print(df_pii)
     count = 0
-    for index, row in df.iterrows():
-        for index_c, compare_row in df.iterrows():
+    for index, row in df_pii.iterrows():
+        for index_c, compare_row in df_pii.iterrows():
             if row.equals(compare_row):
                 count += 1
+                if count >= k:
+                    continue
             # print(row)
             # print(count, '!!!!!')
         if count < k:
@@ -109,13 +115,13 @@ two_anon = pd.DataFrame(
 )
 
 # print(two_anon)
-# print(is_k_anonymous(2, two_anon))
+print(is_k_anonymous(2, anon,['Name']) )
 
 # Question 4
 # Implement a function make_k_anonymous that makes the given dataframe k-Anonymous for a given k. Your solution 
 # should be able to anonymize the adult_anon dataframe so that your implementation of is_k_anonymous returns True.
 
-print(anon.head())
+# print(anon.head())
 def make_k_anonymous(k, iqs, df):
     return "undefined"
 
