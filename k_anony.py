@@ -81,10 +81,10 @@ res2 = pd.merge(
 # print( res2 )
 
 # Question 3 In this cell, write code to implement 'is_k_anonymous'. This function has three arguments.
-#       k is coeficient of k-anonymity, df is the dataframe testing on, pii is a list of personal identifiable 
-#       column names that may lead to violating k-anonymity. Your runtime should be considerably short.
+#       k is coeficient of k-anonymity, df is the dataframe testing on, qis is a list of quasi-identifier 
+#       columns that may lead to violating k-anonymity. Your runtime should be considerably short.
 
-def is_k_anonymous(k, df, pii):
+def is_k_anonymous(k, df, qis):
     df_pii = df.loc[:,pii]
     # print(df_pii)
     count = 0
@@ -93,9 +93,9 @@ def is_k_anonymous(k, df, pii):
             if row.equals(compare_row):
                 count += 1
                 if count >= k:
-                    continue
-            # print(row)
-            # print(count, '!!!!!')
+                    break
+            print(row)
+            print(count, '!!!!!')
         if count < k:
             return False
 
