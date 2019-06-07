@@ -4,6 +4,7 @@
 ###
 import pandas as pd
 import numpy as np
+import kAnonymity1 as ka
 
 adult_data = pd.read_csv("adult_with_pii.csv")
 
@@ -84,18 +85,18 @@ res2 = pd.merge(
 #       k is coeficient of k-anonymity, df is the dataframe testing on, qis is a list of quasi-identifier 
 #       columns that may lead to violating k-anonymity. Your runtime should be considerably short.
 
-def is_k_anonymous(k, df, qis):
-    df_pii = df.loc[:,pii]
-    # print(df_pii)
+def is_k_anonymous(k, df, qsi):
+    df_qsi = df.loc[:,qsi]
+    print(df_qsi)
     count = 0
-    for index, row in df_pii.iterrows():
-        for index_c, compare_row in df_pii.iterrows():
+    for index, row in df_qsi.iterrows():
+        for index_c, compare_row in df_qsi.iterrows():
             if row.equals(compare_row):
                 count += 1
                 if count >= k:
                     break
-            print(row)
-            print(count, '!!!!!')
+            # print(row)
+            # print(count, '!!!!!')
         if count < k:
             return False
 
@@ -115,7 +116,7 @@ two_anon = pd.DataFrame(
 )
 
 # print(two_anon)
-print(is_k_anonymous(2, anon,['Name']) )
+print(ka.is_k_anonymous(2, df = anon,['DOB', 'SSN', 'Zip']) )
 
 # Question 4
 # Implement a function make_k_anonymous that makes the given dataframe k-Anonymous for a given k. Your solution 
