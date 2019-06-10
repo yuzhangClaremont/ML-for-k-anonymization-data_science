@@ -5,6 +5,8 @@
 import pandas as pd
 import numpy as np
 import kAnonymity1 as ka
+import utils.tools as tools 
+# from utils.tools import add_columns as add_columns
 
 adult_data = pd.read_csv("adult_with_pii.csv")
 
@@ -37,6 +39,7 @@ pii = adult_data[['Name', 'DOB', 'SSN', 'Zip']]
 # date-of-birth and zipcode?
 # read anon data
 anon = pd.read_csv("anon.csv")
+anon2 = pd.read_csv("newAdult.csv")
 
 
 # combine two columns into a new dataframe of strings
@@ -52,7 +55,7 @@ print( sythesized.value_counts()[ sythesized.value_counts()== 1].size )# 32359 c
 # 
 # read attack data
 attack_data = pd.read_csv("attack.csv")
-print(anon.head())
+print(anon2.head())
 print(attack_data.head())
 
 # test
@@ -87,7 +90,7 @@ res2 = pd.merge(
 
 def is_k_anonymous(k, df, qsi):
     df_qsi = df.loc[:,qsi]
-    print(df_qsi)
+    # print(df_qsi)
     count = 0
     for index, row in df_qsi.iterrows():
         for index_c, compare_row in df_qsi.iterrows():
@@ -95,8 +98,8 @@ def is_k_anonymous(k, df, qsi):
                 count += 1
                 if count >= k:
                     break
-            # print(row)
-            # print(count, '!!!!!')
+            print(row)
+            print(count, '!!!!!')
         if count < k:
             return False
 
@@ -116,7 +119,8 @@ two_anon = pd.DataFrame(
 )
 
 # print(two_anon)
-print(ka.is_k_anonymous(2, df = anon,['DOB', 'SSN', 'Zip']) )
+# print(is_k_anonymous(2, anon2, ['age']) , '!!!!!!!')
+# print(ka.is_k_anonymous(2, anon, ['DOB', 'Zip']) )
 
 # Question 4
 # Implement a function make_k_anonymous that makes the given dataframe k-Anonymous for a given k. Your solution 
@@ -162,3 +166,9 @@ def make_k_anonymous(k, iqs, df):
 
 # if adult_anon['DOB'] == pii['DOB'] and adult_anon['Zip'] == pii['Zip']:
 #     print(pii['Name'])
+
+new_col = ['age', 'workclass', 'fnlwgt', 'education', 'education_num', 
+'marital_status', 'moving', 'relationship', 'race', 'sex', 
+'capital_gain', 'capital_loss', 'hours_per_week', 'native_country','income']
+adult = tools.add_columns(anon2, new_col)
+adult.to_csv(r'newAdult2.csv',index=False)

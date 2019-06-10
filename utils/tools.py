@@ -2,6 +2,8 @@
 Useful tools 
 Authour: Yun "Max" Zhang
 """
+import pandas as pd
+import numpy as np
 
 def data_to_csv(input):
     """
@@ -16,3 +18,15 @@ def data_to_csv(input):
 
             line = line.strip().split(',')
             output_writer.writerow(line)
+
+def add_columns(data, column):
+    """
+    input a csv or data file
+    output a csv or data file with a column
+    """
+    # f = pd.read_csv(input)
+    data.columns = column
+    return data
+
+attack = pd.read_csv('adult_with_pii.csv')
+print(attack.head())
