@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import utils.tools as tools 
+# import utils.tools as tools 
 
 
 '''
@@ -14,7 +14,7 @@ Question1: Use pandas to read data newAdult.csv, a data set from 1994 Census dat
 '''
 
 f = pd.read_csv('newAdult.csv')
-# print(f.describe())
+print(f.columns)
 '''
 # there are 32560 rows in the data set
 '''
@@ -117,6 +117,21 @@ Question 4: Now we wish to generalize the informations in adult.csv to make it k
             sub-optimal. The detail of this algorithm can be found at: https://github.com/qiyuangong/Mondrian
             Read through it, and use this package to make this data set 2-anonymous.
 '''
+
+# f.columns = [''] * len(f.columns)
+f.to_csv(r'data/newAdult4.csv',index=False, header = False)
+
+# TODO: Use os module to run command 'python3 anonymizer.py s a 2'. Read the generated data 'data/anonymized.csv'
 import os
-cmd = 'python anonymizer.py s "adult.csv" 2'
-# anony = pd.read_csv()
+cmd = 'python3 anonymizer.py s a 2'
+os.system(cmd) 
+anony = pd.read_csv('data/anonymized.csv')
+
+# TODO: Add columns as ['age', 'workclass',  'education_num','marital_status', 'moving', 'race', 'sex','native_country','income']
+anony.columns = ['age', 'workclass',  'education_num',
+       'marital_status', 'moving', 'race', 'sex',
+        'native_country','income']
+
+# TODO: Print the head of the anonymized data, then test if it is k-anonymous using the function in Question 3
+print(anony.head())
+print(is_k_anonymous(2,anony, qsi))
