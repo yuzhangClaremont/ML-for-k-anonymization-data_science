@@ -1,3 +1,0 @@
-# Differential Privacy
-
-## Link attack
