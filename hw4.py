@@ -9,6 +9,7 @@ Question1: Use pandas to read data newAdult.csv. How many rows are there in this
             Is there any personal Identifiable information in the data set?
             Is there any quasi-identifier information according to Sweeney's defination?
             Can you find possible quasi-identifier among the columns? Why are they?
+            How unique the data is with age, fnlwgt, native_country being quasi-identifier?
 '''
 
 f = pd.read_csv('newAdult.csv')
@@ -20,6 +21,8 @@ f = pd.read_csv('newAdult.csv')
 # print(f.age.value_counts())
 # print(f.fnlwgt.value_counts())
 # print(f.native_country.value_counts())
+f2 = f.drop_duplicates(['age','fnlwgt', 'native_country'])
+# print(f2.describe()) # 29560 unique
 
 '''
 column = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
@@ -33,7 +36,24 @@ age, fnlwgt, native_country. because value_counts have 1, so more likely to id p
 '''
 
 '''
-Question 2: Consider the definiaiton of k-anonymity, write a function to decide if 
+Question 2: Suppose now you have a sensitive dataframe of 10,000 rows, link_attack.csv,
+            which contains personal identifiable information, perform a link attack
+            to re-identify people's name, ssn, race, and salary. You can use ['age',  'fnlwgt',
+            'native_country']
+    
+'''
+link_attack = pd.read_csv('link_attack.csv')
+merged = pd.merge(f, link_attack, on = ['age','fnlwgt', 'native_country'])
+
+# print(merged.head())
+# print(merged.describe()) # 12144
+# merged2 = merged.drop_duplicates(['age','fnlwgt', 'native_country'])
+# print(merged2.head())
+# print(merged2.describe()) # 9702
+## 97% of them can be re-identified by link attack
+
+'''
+Question 3: Consider the definiaiton of k-anonymity, write a function to decide if 
             a data set is k-anonymous for a list of quasi-identifier
 '''
 qsi = ['age',  'fnlwgt',
