@@ -4,7 +4,8 @@ import numpy as np
 
 
 '''
-Question1: Use pandas to read data newAdult.csv, a data set from 1994 Census database (https://archive.ics.uci.edu/ml/datasets/adult).
+Question1:  Use pandas to read data newAdult.csv, a data set from 1994 Census database (retrived
+            from: https://archive.ics.uci.edu/ml/datasets/adult).
             How many rows are there in this data set? 
             What are the column names? 
             Is there any personal Identifiable information in the data set?
@@ -14,27 +15,51 @@ Question1: Use pandas to read data newAdult.csv, a data set from 1994 Census dat
 '''
 
 f = pd.read_csv('newAdult.csv')
-print(f.columns)
-'''
-# there are 32560 rows in the data set
-'''
-# print(f.columns)
-# print(f.age.value_counts())
-# print(f.fnlwgt.value_counts())
-# print(f.native_country.value_counts())
-f2 = f.drop_duplicates(['age','fnlwgt', 'native_country'])
-# print(f2.describe()) # 29560 unique
+# TODO: How many rows are there in this data set? What are the column names? 
 
+# print(f.describe())
+# print(f.columns)
 '''
+there are 32560 rows in the data set
 column = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
        'marital_status', 'moving', 'relationship', 'race', 'sex',
        'capital_gain', 'capital_loss', 'hours_per_week', 'native_country',
        'income']
+'''
 
+# TODO: Is there any personal Identifiable information in the data set?
+#       Is there any quasi-identifier information according to Sweeney's defination?
+#       Can you find possible quasi-identifier among the columns? Why are they?
+
+# print(f.age.value_counts())
+# print(f.fnlwgt.value_counts())
+# print(f.native_country.value_counts())
+'''
 there is no pii : https://piwik.pro/blog/what-is-pii-personal-data/
-sex is quasi-identifier
+sex is quasi-identifier in Sweeny's defination
 age, fnlwgt, native_country. because value_counts have 1, so more likely to id people
 '''
+
+'''
+Question 2: Your supervisor believes the information in ['fnlwgt', 'education', 'relationship', 'capital_gain', 'capital_loss', 'hours_per_week']
+            are not necessary for your analysis. Use suppression technique to de-idenitify this data set.
+'''
+# TODO: Use suppression technique to de-idenitify this data set. Then save the new data set under data directory as 'suppressed.csv' without a header.
+
+dropped = f.drop(columns = ['fnlwgt', 'education', 'relationship', 'capital_gain', 'capital_loss', 'hours_per_week'])
+print(dropped.head())
+dropped.to_csv('data/suppressed.csv', header = False, index = False)
+
+
+# print(f.age.value_counts())
+# print(f.fnlwgt.value_counts())
+# print(f.native_country.value_counts())
+
+f2 = f.drop_duplicates(['age','sex', 'native_country'])
+print(f2.head()) 
+print(f2.describe()) # 29560 unique
+
+
 
 '''
 Question 2: Suppose now you have a sensitive dataframe of 10,000 rows named as "link_attack.csv",
@@ -133,5 +158,5 @@ anony.columns = ['age', 'workclass',  'education_num',
         'native_country','income']
 
 # TODO: Print the head of the anonymized data, then test if it is k-anonymous using the function in Question 3
-print(anony.head())
-print(is_k_anonymous(2,anony, qsi))
+# print(anony.head())
+# print(is_k_anonymous(2,anony, qsi))
