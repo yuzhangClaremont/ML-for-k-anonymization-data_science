@@ -45,7 +45,7 @@ def read_data():
         intuitive_number.append(0)
         intuitive_order.append(list())
     # data_file = open('data/adult.data', 'rU')
-    data_file = open('data/monAdult.csv', 'rU')
+    data_file = open('data/monAdult.csv', 'rU') # newAdult without header
     for line in data_file:
         line = line.strip()
         # remove empty and incomplete lines

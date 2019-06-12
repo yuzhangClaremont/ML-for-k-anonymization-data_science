@@ -152,25 +152,50 @@ Question 5: Now we wish to generalize the informations in adult.csv to make it k
 # f.to_csv(r'data/newAdult4.csv',index=False, header = False)
 
 # TODO: Use os module to run command 'python3 anonymizer.py s a 2'. Read the head generated data 'data/anonymized.csv'
+#       then add column names ['age', 'workclass',  'education_num','marital_status', 'moving', 'race', 'sex','native_country','income']
+#       back to the anonymized data set. Observe the data by printing out the head and describe funtion.
 import os
 cmd = 'python3 anonymizer.py s a 2'
 os.system(cmd) 
 anony = pd.read_csv('data/anonymized.csv')
+anony.columns = ['age', 'workclass',  'education_num',
+       'marital_status', 'moving', 'race', 'sex',
+        'native_country','income']
 print('k-anonymized data !!!!')
 print(anony.head())
 print(anony.describe())
 
-# TODO: Add column names ['age', 'workclass',  'education_num','marital_status', 'moving', 'race', 'sex','native_country','income']
-#       back to the anonymized data set
 
-anony.columns = ['age', 'workclass',  'education_num',
-       'marital_status', 'moving', 'race', 'sex',
-        'native_country','income']
-
-# TODO: Test if it is k-anonymous using the function in Question 3. How many rows in this data set are unique now?
+# TODO: Test if it is k-anonymous using the function in Question 3 and same quasi-identifier. How many rows in this data set are unique now?
 
 print(is_k_anonymous(2,anony, qsi))
 
-unique_anony = anony.drop_duplicates(keep = False)
+unique_anony = anony.drop_duplicates(['age', 'sex', 'native_country'], keep = False)
 print(unique_anony.head()) #
 print(unique_anony.describe()) #
+
+'''
+It is 2-anonymous now. And there are 0 unique rows with qsi = ['age', 'sex', 'native_country']
+'''
+
+# monAnony = pd.read_csv('data/monAdult.csv')
+# print(monAnony.describe())
+'''
+Question 6: Use the anonymized data set, analyze what percentage of male and female has income 
+            less than 50k? Compare the result with the original datase 'newAdult.csv'.
+'''
+sex_group = anony.groupby(['sex'])
+for sex, sex_df in sex_group:
+    print(sex)
+    print(sex_df.describe())
+
+# male 13685/20017, female 8002/9062
+
+print('original data!!!!!!!')
+sex_group2 = f.groupby(['sex'])
+for sex, sex_df in sex_group:
+    print(sex)
+    print(sex_df.describe())
+
+# male 13685/20017, female 8002/9062
+
