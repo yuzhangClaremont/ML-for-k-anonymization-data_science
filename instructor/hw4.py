@@ -4,36 +4,35 @@ import numpy as np
 
 
 '''
-Question1:  Use pandas to read data newAdult.csv, a data set from 1994 Census database (retrived
+Question1:  Use pandas to read data newAdult.csv, a data set from 1994 Census database (retrieved
             from: https://archive.ics.uci.edu/ml/datasets/adult).
             How many rows are there in this data set? 
             What are the column names? 
             Is there any personal Identifiable information in the data set?
             Is there any quasi-identifier information according to Sweeney's defination?
             Can you find possible quasi-identifier among the columns? Why are they?
-            How many unique the data can be identified with age, fnlwgt, native_country being quasi-identifier?
 '''
 
-f = pd.read_csv('newAdult.csv')
+f = pd.read_csv('data/adult.data')
+f.columns = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
+'marital_status', 'moving', 'relationship', 'race', 'sex',
+'capital_gain','capital_loss', 'hours_per_week', 'native_country','income']
 # TODO: How many rows are there in this data set? What are the column names? 
 
-# print(f.describe())
-# print(f.columns)
+print(f.describe())
+
 '''
 there are 32560 rows in the data set
-column = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
-       'marital_status', 'moving', 'relationship', 'race', 'sex',
-       'capital_gain', 'capital_loss', 'hours_per_week', 'native_country',
-       'income']
+
 '''
 
 # TODO: Is there any personal Identifiable information in the data set?
 #       Is there any quasi-identifier information according to Sweeney's defination?
 #       Can you find possible quasi-identifier among the columns? Why are they?
 
-# print(f.age.value_counts())
-# print(f.fnlwgt.value_counts())
-# print(f.native_country.value_counts())
+print(f.age.value_counts())
+print(f.fnlwgt.value_counts())
+print(f.native_country.value_counts())
 '''
 there is no pii : https://piwik.pro/blog/what-is-pii-personal-data/
 sex is quasi-identifier in Sweeny's defination
@@ -198,4 +197,7 @@ for sex, sex_df in sex_group:
     print(sex_df.describe())
 
 # male 13685/20017, female 8002/9062
+
+
+
 
