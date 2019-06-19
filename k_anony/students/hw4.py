@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import os
-# import utils.tools as tools 
-
 
 '''
 Question1:  Use pandas to read data adult.data, a data set from 1994 Census database (retrieved
