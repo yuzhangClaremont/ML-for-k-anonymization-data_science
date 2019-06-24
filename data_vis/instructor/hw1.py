@@ -63,20 +63,22 @@ male      0.188908
 '''
 
 def survived_median_age(df):
-    survived_df = survived(df)
-    survived_df.dropna(subset = ['Age'], inplace = True)
-    group_median = survived_df.groupby('Survived').median()
+    # survived_df = survived(df)
+    df.dropna(subset = ['Age'], inplace = True)
+    group_median = df.groupby('Survived').median()
     return group_median['Age']
 
 print(survived_median_age(df))
 
 def survived_mean_age(df):
-    survived_df = survived(df)
-    survived_df.dropna(subset = ['Age'], inplace = True)
-    group_mean = survived_df.groupby('Survived').mean()
+    # survived_df = survived(df)
+    df.dropna(subset = ['Age'], inplace = True)
+    group_mean = df.groupby('Survived').mean()
     return group_mean['Age']
 print('mean')
 print(survived_mean_age(df))
+
+print(df['Survived'].value_counts())
 
 # age_group = {'0-9':0, '10-19':0,'20-29':0, '30-39':0,'40-49':0, 
 #             '50-59':0,'60-69':0, '70-79':0, '80-90':0}
