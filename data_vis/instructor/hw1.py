@@ -10,9 +10,73 @@ import seaborn as sns # Comment this if seaborn is not installed
 import re
 import os
 
+# Question 1
 PATH = os.path.join('data','train.csv')
 df = pd.read_csv(PATH)
-# print(df.describe())
+print(df.dtypes)
+for c in df.columns:
+    print(c, df[c].isnull().sum())
+
+df.drop(columns = ['Cabin'], inplace = True)
+print(df.isnull().sum())
+
+
+'''
+1a. catigorical and continueous should be classified differently. float, int or object
+1.b. pclass, sex, age, cabin
+no data can be used for other purposes
+1c. 891
+1d. age and cabin
+
+'''
+# Q2
+def survived(df):
+    res = df[ df['Survived'] == 1]
+    res = df.loc[ df['Survived'] == 1]
+    return res
+survived_df = survived(df)
+print(survived_df.describe())
+
+def survive_rate(df, feature):
+    base = df[feature].value_counts()
+    survived_df = survived(df)
+    anominator = survived_df[feature].value_counts()
+    return anominator/base
+print('!!!',survive_rate(df, 'Parch'))
+
+'''
+!!! female    0.742038
+male      0.188908
+
+!!! 1    0.629630
+2    0.472826
+3    0.242363
+
+!!! 0    0.343658
+1    0.550847
+2    0.500000
+3    0.600000
+4         NaN
+5    0.200000
+6         NaN
+
+'''
+
+def survived_median_age(df):
+    survived_df = survived(df)
+    survived_df.dropna(subset = ['Age'], inplace = True)
+    group_median = survived_df.groupby('Survived').median()
+    return group_median['Age']
+
+print(survived_median_age(df))
+
+def survived_mean_age(df):
+    survived_df = survived(df)
+    survived_df.dropna(subset = ['Age'], inplace = True)
+    group_mean = survived_df.groupby('Survived').mean()
+    return group_mean['Age']
+print('mean')
+print(survived_mean_age(df))
 
 # age_group = {'0-9':0, '10-19':0,'20-29':0, '30-39':0,'40-49':0, 
 #             '50-59':0,'60-69':0, '70-79':0, '80-90':0}
@@ -32,7 +96,7 @@ survive_rate = age_groups['Survived'] / age_group_count
 # plt.show(sns)
 
 # df.dropna(axis = 1,  inplace = True)
-print(re.findall("\w+[.]", 'Heikkinen, Miss. Laina'))
+# print(re.findall("\w+[.]", 'Heikkinen, Miss. Laina'))
 # print(df['Age'].astype(str)[0][0])
 
 # 5.b
@@ -43,7 +107,7 @@ survived_median = df.groupby('Survived').median()
 # df['MedianAge'] = df.groupby('Survived')['Age'].transform("median")
 # df.loc[0:100,['MedianAge']] = 100
 survived_median.rename(columns = {'Age': 'MedianAge'}, inplace = True)
-print(dfS.head())
+# print(dfS.head())
 sns.barplot(x = survived_median.index, y = survived_median.Age)
 plt.show(sns)
 # print(dfS)
