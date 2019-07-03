@@ -121,7 +121,7 @@ def main():
 
                 Write some codes after TODO. Then write your response in a seperate file and save it as hw4.pdf.
     '''
-
+    print('there are', df.shape[0], 'rows in df~~~')
     # TODO:      Add column names to this data set. The list of column names are: ['age', 'workclass', 
     #           'fnlwgt', 'education', 'education_num', 'marital_status', 'moving', 'relationship', 
     #            # 'race', 'sex', 'capital_gain', 'capital_loss', 'hours_per_week', 'native_country','income']
@@ -131,7 +131,6 @@ def main():
 
     # TODO:      How many rows are there in this data set?
     print('there are', df.shape[0], 'rows in df~~~')
-
     '''
     there are 32560 rows in the data set
     '''
@@ -160,6 +159,7 @@ def main():
     suppressed_df.columns = ['age', 'workclass',  'education_num',
        'marital_status', 'moving', 'race', 'sex',
         'native_country','income']
+    print(df.shape[0], suppressed_df.shape[0])
 
     unique = suppressed_df.drop_duplicates(keep = False)
     # print(unique.head()) 
@@ -212,7 +212,6 @@ def main():
     anony.columns = ['age', 'workclass',  'education_num',
         'marital_status', 'moving', 'race', 'sex',
             'native_country','income']
-    # print('k-anonymized data !!!!')
     # print(anony.head())
     # print(anony.describe())
     print('is anony file k anonymous? ',is_k_anonymous(2,anony, qsi))
@@ -233,22 +232,46 @@ def main():
     '''
     Question 6: Analize df and the k-anonymous data sets in the main function. What percentage of 
                 male and female has income less than 50k? Does the process of k-anonymous make the 
-                conclusion different?
+                conclusion different? What are the advantages and disadvantages of k-anonymization?
     '''
+    # TODO: Your analysis code here
     sex_group = anony.groupby(['sex'])
     for sex, sex_df in sex_group:
-        print(sex)
-        print(sex_df.describe())
+        print(sex, sex_df.shape[0])
+        print(sex_df.income.value_counts())
+        # print(sex_df.income.value_counts(normalize = True))
 
-    # male 13685/20017, female 8002/9062
+    # male 13685/20017 0.68, female 8002/9062 0.88, male~female 965/1081 , sum = 30160
+
 
     print('original data!!!!!!!')
-    sex_group2 = df.groupby(['sex'])
-    for sex, sex_df in sex_group:
-        print(sex)
-        print(sex_df.describe())
+    sex_group2 = suppressed_df.groupby(['sex'])
+    for sex, sex_df in sex_group2:
+        print(sex, sex_df.shape[0])
+        print(sex_df.income.value_counts( ))
+        # print(sex_df.income.value_counts( normalize= True))
+    # male 15126/21788 0.69, female 9592/10771 0.89 sum = 32559
+
+    # print(df.isnull().sum() )
+    # print(df.describe() )
+    # print(anony.describe())
+
+     
 
     # male 13685/20017, female 8002/9062
+    # print('race anony data!!!!!!!')
+    # race_group = anony.groupby(['race'])
+    # for race, race_df in race_group:
+    #     print(race)
+    #     print(race_df.income.value_counts())
+
+    # # male 13685/20017, female 8002/9062
+
+    # print('race original data!!!!!!!')
+    # race_group2 = df.groupby(['race'])
+    # for race, race_df in race_group:
+    #     print(race)
+    #     print(race_df.describe())
 
 #     # test 1
 #     assert np.array_equal(df.columns, ['age', 'workclass', 
@@ -291,7 +314,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("hello!!!")
+
 
 
 

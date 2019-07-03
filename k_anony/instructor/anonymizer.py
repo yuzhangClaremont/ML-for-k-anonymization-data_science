@@ -18,6 +18,7 @@ def write_to_file(result):
     """
     write the anonymized result to anonymized.csv
     """
+    print('Hello!!!!!!!!!!!!!!!')
     with open("data/anonymized.csv", "w") as output:
         for r in result:
             output.write(','.join(r) + '\n')
