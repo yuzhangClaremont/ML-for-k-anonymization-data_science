@@ -153,7 +153,7 @@ def main():
     '''
     Question 6: Analize df and the k-anonymous data sets in the main function. What percentage of 
                 male and female has income less than 50k? Does the process of k-anonymous make the 
-                conclusion different?
+                conclusion different? What are the advantages and disadvantages of k-anonymization?
     '''
     # TODO: Write your analysis code here
 
