@@ -76,29 +76,9 @@ def is_k_anonymous(k, df, qsi):
    
 
 
-'''
-Question 6: Use the anonymized data set, analyze what percentage of male and female has income 
-#             less than 50k? Compare the result with the original datase 'adult.data'.
-# '''
-# sex_group = anony.groupby(['sex'])
-# for sex, sex_df in sex_group:
-#     print(sex)
-#     print(sex_df.describe())
-
-# # male 13685/20017, female 8002/9062
-
-# print('original data!!!!!!!')
-# sex_group2 = df.groupby(['sex'])
-# for sex, sex_df in sex_group:
-#     print(sex)
-#     print(sex_df.describe())
-
-# male 13685/20017, female 8002/9062
-
 def main():
     PATH = os.path.join('data', 'adult.data')
     df = pd.read_csv(PATH)
-
     '''
     Question1:  Use pandas functions to print out DataFrame information 
                 and answer questions in your writeup pdf file.
@@ -171,8 +151,11 @@ def main():
   
 
     '''
-    It is 2-anonymous now. And there are 0 unique rows with qsi = ['age', 'sex', 'native_country']
+    Question 6: Analize df and the k-anonymous data sets in the main function. What percentage of 
+                male and female has income less than 50k? Does the process of k-anonymous make the 
+                conclusion different?
     '''
+    # TODO: Write your analysis code here
 
 
 
