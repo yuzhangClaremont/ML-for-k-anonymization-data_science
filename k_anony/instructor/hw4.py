@@ -108,8 +108,11 @@ this data set is not 2 anonymous with this quasi-identifers
 
 
 def main():
+
     PATH = os.path.join('data', 'adult.data')
+    # PATH = os.path.join('data', 'monAdult.csv'
     df = pd.read_csv(PATH)
+    
 
     '''
     Question1:  In the main function of hw4.py, use pandas functions to print out DataFrame information 
@@ -121,21 +124,14 @@ def main():
 
                 Write some codes after TODO. Then write your response in a seperate file and save it as hw4.pdf.
     '''
-    print('there are', df.shape[0], 'rows in df~~~')
-    # TODO:      Add column names to this data set. The list of column names are: ['age', 'workclass', 
-    #           'fnlwgt', 'education', 'education_num', 'marital_status', 'moving', 'relationship', 
-    #            # 'race', 'sex', 'capital_gain', 'capital_loss', 'hours_per_week', 'native_country','income']
-    df.columns = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
-    'marital_status', 'moving', 'relationship', 'race', 'sex',
-    'capital_gain','capital_loss', 'hours_per_week', 'native_country','income']
-
-    # TODO:      How many rows are there in this data set?
+ 
+    # TODO:     A. How many rows are there in this data set?
     print('there are', df.shape[0], 'rows in df~~~')
     '''
-    there are 32560 rows in the data set
+    there are 32560 rows in the data set  
     '''
 
-    # TODO      Write some code to explore the DataFrame.
+    # TODO      C. Write some code to explore the DataFrame.
     #           Can you find possible quasi-identifier among the columns? 
     #           Why do you think they can be quasi-identifier?
 
@@ -150,47 +146,66 @@ def main():
     '''
 
     """
-    Question 2
-    # TODO: How many rows in suppressed data set are unique?
+    Question 2 Data preprocess and Feature Engineering
+
     """
+    missing_values = ["n/a", "na", "--", "unknown", " ?","", ' ']
+    # TODO: A. Data clean
+    df = pd.read_csv(PATH, na_values = missing_values)
+    df.dropna(axis = 0, how = 'any', inplace = True)
+    print('there are', df.shape[0], 'rows in cleaned df~~~')
+    # -> 30161 after drop na
+
+    # TODO:     B. Add column names to this data set. The list of column names are: ['age', 'workclass', 
+    #           'fnlwgt', 'education', 'education_num', 'marital_status', 'moving', 'relationship', 
+    #            # 'race', 'sex', 'capital_gain', 'capital_loss', 'hours_per_week', 'native_country','income']
+    df.columns = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
+    'marital_status', 'moving', 'relationship', 'race', 'sex',
+    'capital_gain','capital_loss', 'hours_per_week', 'native_country','income']
+    
+    # TODO:C run suppression() function you implemented with the inputs as the DataFrame df from question 1,
+    # and the column names mentioned above. 
     drop_column_names = ['fnlwgt', 'education', 'relationship', 'capital_gain', 'capital_loss', 'hours_per_week']
     suppressed_path = suppression(df, drop_column_names)
     suppressed_df = pd.read_csv(suppressed_path)
     suppressed_df.columns = ['age', 'workclass',  'education_num',
        'marital_status', 'moving', 'race', 'sex',
         'native_country','income']
-    print(df.shape[0], suppressed_df.shape[0])
-
+    # print(df.shape[0], suppressed_df.shape[0]) # 30161 30160
+    # TODO: D How many rows are unique in the suppressed data set? 
     unique = suppressed_df.drop_duplicates(keep = False)
     # print(unique.head()) 
-    # print(unique.describe()) 
+    print(unique.describe()) 
     '''
-    17048 unique
+    15512 unique
     '''
 
     """
-    Question 3
+    Question 3 b
     """
     ATTACK_PATH = os.path.join('data', 'link_attack.csv')
+
     link_attack_df = pd.read_csv(ATTACK_PATH)
     qsi = ['age','sex', 'native_country']
-    # TODO: Run link_attack you implemented above in the main function with the suppressed 
+    # TODO: B Run link_attack you implemented above in the main function with the suppressed 
     #       DataFrame, the attack DataFrame. Write code to find how many people can you re-identify? 
     #       You can use ['age',  'sex, 'native_country'] as the quasi-identifiers.
     merged_df = link_attack(suppressed_df, link_attack_df,  qsi )
+    print()
 
     merged_unique = merged_df.drop_duplicates(['age','sex', 'native_country'], keep = False)
     # print(merged_unique.head())
-    # print(merged_unique.describe()) 
+    print(merged_unique.describe(), 'can be identified by link attack') 
     '''
-    287 people can be identified by link attack
+    280 people can be identified by link attack
     '''
 
     """
     Question 4: Use is_k_anonymous(k, df, qsi)to test if the suppressed data set is 2 anonymous.
                  Use ['age', 'sex','native_country'] as quasi-identifiers.
     """
-    print('is suppressed file k anonymous???? ',is_k_anonymous(2,suppressed_df, qsi))
+    # TODO: B your code here to test if suppressed data set is k anonymous
+    print('is suppressed file k anonymous? ',is_k_anonymous(2,suppressed_df, qsi))
 
     '''
     Question 5: Now we wish to generalize the informations in adult.csv to make it k-anonymous while minimising
@@ -207,7 +222,7 @@ def main():
     #       'sex','native_country','income'] and observe this data set.
     #       Test if it is k-anonymous using the function in Question 3 and same quasi-identifier.
 
-    os.system(cmd) 
+    os.system(cmd) # NCP = 4.97%
     anony = pd.read_csv('data/anonymized.csv')
     anony.columns = ['age', 'workclass',  'education_num',
         'marital_status', 'moving', 'race', 'sex',
@@ -222,7 +237,7 @@ def main():
 
     unique_anony = anony.drop_duplicates(['age', 'sex', 'native_country'], keep = False)
     # print(unique_anony.head()) #
-    # print(unique_anony.describe()) #
+    print(unique_anony.describe()) # 0 unique
 
     '''
     It is 2-anonymous now. And there are 0 unique rows with qsi = ['age', 'sex', 'native_country']
@@ -241,7 +256,7 @@ def main():
         print(sex_df.income.value_counts())
         # print(sex_df.income.value_counts(normalize = True))
 
-    # male 13685/20017 0.68, female 8002/9062 0.88, male~female 965/1081 , sum = 30160
+    # male 13664/19995 0.6834, female 7872/8923 0.8822, male~female 1117/1243 , sum = 30161
 
 
     print('original data!!!!!!!')
@@ -249,12 +264,17 @@ def main():
     for sex, sex_df in sex_group2:
         print(sex, sex_df.shape[0])
         print(sex_df.income.value_counts( ))
+    print("total data")
+    print(anony.income.value_counts())
+    print(suppressed_df.income.value_counts())
+    print(df.income.value_counts())
         # print(sex_df.income.value_counts( normalize= True))
-    # male 15126/21788 0.69, female 9592/10771 0.89 sum = 32559
 
-    # print(df.isnull().sum() )
-    # print(df.describe() )
-    # print(anony.describe())
+     # male 13982/20378 0.6861, female 8670/9782 0.8863 sum = 30160
+
+    print(df.isnull().sum() )
+    print(df.describe() )
+    print(anony.describe())
 
      
 
