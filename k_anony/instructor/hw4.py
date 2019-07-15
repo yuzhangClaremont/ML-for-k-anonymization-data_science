@@ -8,6 +8,12 @@ Name:
 import pandas as pd
 import numpy as np
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn import metrics
+from sklearn.preprocessing import LabelEncoder
+
 
 '''
 Question 2: Your supervisor believes the information in ['fnlwgt', 'education', 'relationship', 
@@ -276,7 +282,159 @@ def main():
     print(df.describe() )
     print(anony.describe())
 
-     
+    # ML Pipeline
+
+    train, test = train_test_split(suppressed_df, test_size = 0.15)
+    # -------------------------- ENCODING -------------------------- #
+
+    # Create a label encoder object
+    le = LabelEncoder()
+    le_count = 0
+
+    # Iterate through the columns
+    for col in train:
+        if train[col].dtype == 'object':
+            # If 2 or fewer unique categories
+            # if len(list(app_train[col].unique())) <= 2:
+                # Train on the training data
+            le.fit(suppressed_df[col])
+            # le.fit(test[col])
+            # Transform both training and testing data
+            train[col] = le.transform(train[col])
+            test[col] = le.transform(test[col])
+            
+            # Keep track of how many columns were label encoded
+            le_count += 1
+                
+    print('%d columns were label encoded.' % le_count)
+
+    # one-hot encoding of categorical variables
+    train = pd.get_dummies(train)
+    test = pd.get_dummies(test)
+
+    print('Training Features shape: ', train.shape)
+    print('Testing Features shape: ', test.shape)
+
+    # -------------------------- ENCODING -------------------------- #
+
+    clf = DecisionTreeClassifier(min_samples_split = 100)
+    # features = ['age',  'education_num','race', 'sex',]
+    features = ['age', 'workclass',  'education_num',
+       'marital_status', 'moving', 'race', 'sex',
+        'native_country']
+
+    # le = preprocessing.LabelEncoder()
+    # le.fit(test['income'])
+
+    # x_train = lb.fit_transform(train[features])  
+    # y_train = lb.fit_transform(train['income'])   
+    # x_test = lb.fit_transform(test[features])   
+    # y_test = lb.fit_transform(test['income'])  
+
+    x_train = train[features] 
+    y_train = train['income']
+    x_test = test[features]
+    y_test = test['income']
+
+    
+    dt = clf.fit(x_train,y_train)
+    # y_pred = clf.predict(x_test)
+    y_pred = clf.predict(x_train)
+    # print(y_pred)
+    # accuracy
+    score = accuracy_score(y_train, y_pred)
+    # score = accuracy_score(y_test, y_pred)
+    print('accuracy') 
+    print(score)
+
+    p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
+                                                          average="weighted")
+                                                    
+    # p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
+    #                                                       average="weighted")
+    print('precision')                                                
+    print(p)
+    print('recall') 
+    print(r)
+    print('f1') 
+    print(f1)
+    print(s)
+    train, test = train_test_split(anony, test_size = 0.15)
+
+    # -------------------------- ENCODING -------------------------- #
+
+    # Create a label encoder object
+    le = LabelEncoder()
+    le_count = 0
+
+    # Iterate through the columns
+    for col in train:
+        if train[col].dtype == 'object':
+            # If 2 or fewer unique categories
+            # if len(list(app_train[col].unique())) <= 2:
+                # Train on the training data
+            le.fit(anony[col])
+            # le.fit(test[col])
+            # Transform both training and testing data
+            train[col] = le.transform(train[col])
+            test[col] = le.transform(test[col])
+            
+            # Keep track of how many columns were label encoded
+            le_count += 1
+                
+    print('%d columns were label encoded.' % le_count)
+
+    # one-hot encoding of categorical variables
+    train = pd.get_dummies(train)
+    test = pd.get_dummies(test)
+
+    print('Training Features shape: ', train.shape)
+    print('Testing Features shape: ', test.shape)
+
+    # -------------------------- ENCODING -------------------------- #
+
+    clf = DecisionTreeClassifier(min_samples_split = 100)
+    features = ['age',  'education_num','race', 'sex',]
+    # features = ['age', 'workclass',  'education_num',
+    #    'marital_status', 'moving', 'race', 'sex',
+    #     'native_country']
+
+    # le = preprocessing.LabelEncoder()
+    # le.fit(test['income'])
+
+    # x_train = lb.fit_transform(train[features])  
+    # y_train = lb.fit_transform(train['income'])   
+    # x_test = lb.fit_transform(test[features])   
+    # y_test = lb.fit_transform(test['income'])  
+
+    x_train = train[features] 
+    y_train = train['income']
+    x_test = test[features]
+    y_test = test['income']
+
+    
+    dt = clf.fit(x_train,y_train)
+    # y_pred = clf.predict(x_test)
+    y_pred = clf.predict(x_train)
+    # print(y_pred)
+    # accuracy
+    score = accuracy_score(y_train, y_pred)
+    # score = accuracy_score(y_test, y_pred)
+    print('accuracy') 
+    print(score)
+
+    p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
+                                                          average="weighted")
+                                                    
+    # p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
+    #                                                       average="weighted")
+    print('precision')                                                
+    print(p)
+    print('recall') 
+    print(r)
+    print('f1') 
+    print(f1)
+
 
     # male 13685/20017, female 8002/9062
     # print('race anony data!!!!!!!')
