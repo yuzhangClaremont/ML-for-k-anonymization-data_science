@@ -338,20 +338,20 @@ def main():
 
     
     dt = clf.fit(x_train,y_train)
-    # y_pred = clf.predict(x_test)
-    y_pred = clf.predict(x_train)
+    y_pred = clf.predict(x_test)
+    # y_pred = clf.predict(x_train)
     # print(y_pred)
     # accuracy
-    score = accuracy_score(y_train, y_pred)
-    # score = accuracy_score(y_test, y_pred)
+    # score = accuracy_score(y_train, y_pred)
+    score = accuracy_score(y_test, y_pred)
     print('accuracy') 
     print(score)
 
-    p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
-                                                          average="weighted")
+    # p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
+                                                        #   average="weighted")
                                                     
-    # p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
-    #                                                       average="weighted")
+    p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
+                                                          average="weighted")
     print('precision')                                                
     print(p)
     print('recall') 
@@ -359,6 +359,8 @@ def main():
     print('f1') 
     print(f1)
     print(s)
+
+
     train, test = train_test_split(anony, test_size = 0.15)
 
     # -------------------------- ENCODING -------------------------- #
@@ -394,10 +396,10 @@ def main():
     # -------------------------- ENCODING -------------------------- #
 
     clf = DecisionTreeClassifier(min_samples_split = 100)
-    features = ['age',  'education_num','race', 'sex',]
-    # features = ['age', 'workclass',  'education_num',
-    #    'marital_status', 'moving', 'race', 'sex',
-    #     'native_country']
+    # features = ['age',  'education_num','race', 'sex',]
+    features = ['age', 'workclass',  'education_num',
+       'marital_status', 'moving', 'race', 'sex',
+        'native_country']
 
     # le = preprocessing.LabelEncoder()
     # le.fit(test['income'])
@@ -414,20 +416,20 @@ def main():
 
     
     dt = clf.fit(x_train,y_train)
-    # y_pred = clf.predict(x_test)
-    y_pred = clf.predict(x_train)
+    y_pred = clf.predict(x_test)
+    # y_pred = clf.predict(x_train)
     # print(y_pred)
     # accuracy
-    score = accuracy_score(y_train, y_pred)
-    # score = accuracy_score(y_test, y_pred)
+    # score = accuracy_score(y_train, y_pred)
+    score = accuracy_score(y_test, y_pred)
     print('accuracy') 
     print(score)
 
-    p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
-                                                          average="weighted")
+    # p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
+                                                        #   average="weighted")
                                                     
-    # p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
-    #                                                       average="weighted")
+    p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
+                                                          average="weighted")
     print('precision')                                                
     print(p)
     print('recall') 
