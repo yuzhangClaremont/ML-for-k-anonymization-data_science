@@ -278,14 +278,30 @@ def main():
 
      # male 13982/20378 0.6861, female 8670/9782 0.8863 sum = 30160
 
-    print(df.isnull().sum() )
-    print(df.describe() )
-    print(anony.describe())
+    # print(df.isnull().sum() )
+    # print(df.describe() )
+    # print(anony.describe())
 
     # ML Pipeline
 
-    train, test = train_test_split(suppressed_df, test_size = 0.15)
+    # train, test = train_test_split(suppressed_df, test_size = 0.15)
     # -------------------------- ENCODING -------------------------- #
+
+    # Create a label encoder object
+    # le = LabelEncoder()
+    # le_count = 0
+
+    # Iterate through the columns
+    # for col in train:
+    #     if train[col].dtype == 'object':
+    #         le.fit(suppressed_df[col])
+
+    #         # Transform both training and testing data
+    #         train[col] = le.transform(train[col])
+    #         test[col] = le.transform(test[col])
+            
+    #         # Keep track of how many columns were label encoded
+    #         le_count += 1
 
     # Create a label encoder object
     le = LabelEncoder()
@@ -295,21 +311,20 @@ def main():
     for col in train:
         if train[col].dtype == 'object':
             # If 2 or fewer unique categories
-            # if len(list(app_train[col].unique())) <= 2:
+            if len(list(train[col].unique())) <= 2:
                 # Train on the training data
-            le.fit(suppressed_df[col])
-            # le.fit(test[col])
-            # Transform both training and testing data
-            train[col] = le.transform(train[col])
-            test[col] = le.transform(test[col])
-            
-            # Keep track of how many columns were label encoded
-            le_count += 1
+                le.fit(suppressed_df[col])
+                # Transform both training and testing data
+                train[col] = le.transform(train[col])
+                test[col] = le.transform(test[col])
                 
-    print('%d columns were label encoded.' % le_count)
+                # Keep track of how many columns were label encoded
+                le_count += 1          
+    # print(train.head())
 
     # one-hot encoding of categorical variables
     train = pd.get_dummies(train)
+    print(train.head())
     test = pd.get_dummies(test)
 
     print('Training Features shape: ', train.shape)
@@ -319,9 +334,14 @@ def main():
 
     clf = DecisionTreeClassifier(min_samples_split = 100)
     # features = ['age',  'education_num','race', 'sex',]
-    features = ['age', 'workclass',  'education_num',
-       'marital_status', 'moving', 'race', 'sex',
-        'native_country']
+    # features = ['age', 'workclass',  'education_num',
+    #    'marital_status', 'moving', 'race', 'sex',
+    #     'native_country']
+    features = train.columns
+    print(features)
+    features = features.tolist()
+    features.remove('income')
+    print(features)
 
     # le = preprocessing.LabelEncoder()
     # le.fit(test['income'])
