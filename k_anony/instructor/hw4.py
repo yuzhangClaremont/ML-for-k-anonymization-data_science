@@ -14,6 +14,84 @@ from sklearn.metrics import accuracy_score
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 
+def performance(y_true, y_pred, metric="f1_score") :
+    """
+    Calculates the performance metric based on the agreement between the 
+    true labels and the predicted labels.
+    
+    Parameters
+    --------------------
+        y_true  -- numpy array of shape (n,), known labels
+        y_pred  -- numpy array of shape (n,), (continuous-valued) predictions
+        metric  -- string, option used to select the performance measure
+                   options: 'accuracy', 'f1_score', 'auroc', 'precision',
+                            'sensitivity', 'specificity'        
+    
+    Returns
+    --------------------
+        score   -- float, performance score
+    """
+    # map continuous-valued predictions to binary labels
+    y_label = np.sign(y_pred)
+    y_label[y_label==0] = 1 # map points of hyperplane to +1
+    
+    # compute performance
+    if metric == "accuracy" :
+        return metrics.accuracy_score(y_true, y_label)
+    elif metric == "f1_score" :
+        return metrics.f1_score(y_true, y_label, average="weighted")
+    elif metric == "auroc" :
+        return metrics.roc_auc_score(y_true, y_pred)
+    elif metric == "precision" :
+        return metrics.precision_score(y_true, y_label)
+    elif metric == "sensitivity" :
+        #conf_mat = metrics.confusion_matrix(y_true, y_label, [1,-1])
+        #tp = conf_mat[0,0]
+        #fn = conf_mat[0,1]
+        #return np.float64(tp)/(tp+fn)
+        return metrics.recall_score(y_true, y_label)
+    elif metric == "specificity" :
+        conf_mat = metrics.confusion_matrix(y_true, y_label, [1,-1])
+        tn = conf_mat[1,1]
+        fp = conf_mat[1,0]
+        return np.float64(tn)/(tn+fp)
+
+def performance_CI(y_true, y_pred, metric="f1_score") :
+    """
+    Estimates the performance of the classifier using the 95% CI.
+    
+    Parameters
+    --------------------
+        y            -- numpy array of shape (n,), binary labels {0,1} of test set
+        y_pred       -- numpy array of shape (n,), probability predictions for test set
+        metric       -- string, option used to select performance measure
+    
+    Returns
+    --------------------
+        score        -- float, classifier performance
+        lower        -- float, lower limit of confidence interval
+        upper        -- float, upper limit of confidence interval
+    """
+    
+
+    score = performance(y_true, y_pred, metric)
+    
+    # run bootstraps
+    n = len(y_true)
+    score_list = []
+    for trial in range(1000) :
+        sample = np.random.randint(n, size=n)
+        score_b = performance(y_true[sample], y_pred[sample], metric)
+        if not np.isnan(score_b) :
+            score_list.append(score_b)
+    
+    # compute CI
+    score_list.sort()
+    l = len(score_list)
+    lower = score_list[int(0.025*l)]
+    upper = score_list[int(0.975*l)]
+    
+    return score, lower, upper
 
 '''
 Question 2: Your supervisor believes the information in ['fnlwgt', 'education', 'relationship', 
@@ -256,66 +334,62 @@ def main():
                 conclusion different? What are the advantages and disadvantages of k-anonymization?
     '''
     # TODO: Your analysis code here
-    sex_group = anony.groupby(['sex'])
-    for sex, sex_df in sex_group:
-        print(sex, sex_df.shape[0])
-        print(sex_df.income.value_counts())
+    # sex_group = anony.groupby(['sex'])
+    # for sex, sex_df in sex_group:
+    #     print(sex, sex_df.shape[0])
+    #     print(sex_df.income.value_counts())
+
         # print(sex_df.income.value_counts(normalize = True))
 
     # male 13664/19995 0.6834, female 7872/8923 0.8822, male~female 1117/1243 , sum = 30161
 
 
-    print('original data!!!!!!!')
-    sex_group2 = suppressed_df.groupby(['sex'])
-    for sex, sex_df in sex_group2:
-        print(sex, sex_df.shape[0])
-        print(sex_df.income.value_counts( ))
-    print("total data")
-    print(anony.income.value_counts())
-    print(suppressed_df.income.value_counts())
-    print(df.income.value_counts())
+    # print('original data!!!!!!!')
+    # sex_group2 = suppressed_df.groupby(['sex'])
+    # for sex, sex_df in sex_group2:
+    #     print(sex, sex_df.shape[0])
+    #     print(sex_df.income.value_counts( ))
+    # print("total data")
+    # print(anony.income.value_counts())
+    # print(suppressed_df.income.value_counts())
+    # print(df.income.value_counts())
+
         # print(sex_df.income.value_counts( normalize= True))
 
      # male 13982/20378 0.6861, female 8670/9782 0.8863 sum = 30160
 
-    print(df.isnull().sum() )
-    print(df.describe() )
-    print(anony.describe())
+    # print(df.isnull().sum() )
+    # print(df.describe() )
+    # print(anony.describe())
 
     # ML Pipeline
 
     train, test = train_test_split(suppressed_df, test_size = 0.15)
-    # -------------------------- ENCODING -------------------------- #
+    # suppressed data set numeric encoding
 
     # Create a label encoder object
     le = LabelEncoder()
-    le_count = 0
+
+    print(suppressed_df.income.value_counts())
 
     # Iterate through the columns
     for col in train:
         if train[col].dtype == 'object':
-            # If 2 or fewer unique categories
-            # if len(list(app_train[col].unique())) <= 2:
-                # Train on the training data
             le.fit(suppressed_df[col])
-            # le.fit(test[col])
             # Transform both training and testing data
             train[col] = le.transform(train[col])
             test[col] = le.transform(test[col])
-            
-            # Keep track of how many columns were label encoded
-            le_count += 1
-                
-    print('%d columns were label encoded.' % le_count)
 
-    # one-hot encoding of categorical variables
-    train = pd.get_dummies(train)
-    test = pd.get_dummies(test)
+    print(train.income.value_counts())
+
+    # # one-hot encoding of categorical variables
+    # train = pd.get_dummies(train)
+    # test = pd.get_dummies(test)
 
     print('Training Features shape: ', train.shape)
     print('Testing Features shape: ', test.shape)
 
-    # -------------------------- ENCODING -------------------------- #
+    #  train model
 
     clf = DecisionTreeClassifier(min_samples_split = 100)
     # features = ['age',  'education_num','race', 'sex',]
@@ -323,47 +397,39 @@ def main():
        'marital_status', 'moving', 'race', 'sex',
         'native_country']
 
-    # le = preprocessing.LabelEncoder()
-    # le.fit(test['income'])
-
-    # x_train = lb.fit_transform(train[features])  
-    # y_train = lb.fit_transform(train['income'])   
-    # x_test = lb.fit_transform(test[features])   
-    # y_test = lb.fit_transform(test['income'])  
 
     x_train = train[features] 
     y_train = train['income']
     x_test = test[features]
     y_test = test['income']
-
-    
+ 
     dt = clf.fit(x_train,y_train)
     y_pred = clf.predict(x_test)
-    # y_pred = clf.predict(x_train)
-    # print(y_pred)
-    # accuracy
-    # score = accuracy_score(y_train, y_pred)
-    score = accuracy_score(y_test, y_pred)
-    print('accuracy') 
-    print(score)
 
-    # p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
-                                                        #   average="weighted")
+    score = metrics.accuracy_score(y_test, y_pred)
+    print('suppressed accuracy') 
+    print(score)
                                                     
     p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
                                                           average="weighted")
+
+    print("PERFORMANCE FUNC", performance(y_test, y_pred, metric = "f1_score"))
+    print(metrics.confusion_matrix(y_test, y_pred))
     print('precision')                                                
     print(p)
     print('recall') 
     print(r)
     print('f1') 
     print(f1)
-    print(s)
+    score, lower, upper = performance_CI(np.array(y_test), np.array(y_pred) )
+    print('confidence interval')
+    print(score, lower, upper)
 
+    #   k-anonymized data
 
     train, test = train_test_split(anony, test_size = 0.15)
 
-    # -------------------------- ENCODING -------------------------- #
+    # anony data numerical encoding
 
     # Create a label encoder object
     le = LabelEncoder()
@@ -372,42 +438,26 @@ def main():
     # Iterate through the columns
     for col in train:
         if train[col].dtype == 'object':
-            # If 2 or fewer unique categories
-            # if len(list(app_train[col].unique())) <= 2:
-                # Train on the training data
+            # Train on the training data
             le.fit(anony[col])
-            # le.fit(test[col])
+
             # Transform both training and testing data
-            train[col] = le.transform(train[col])
-            test[col] = le.transform(test[col])
+            train.loc[:,col] = le.transform(train[col])
+            test.loc[:,col] = le.transform(test[col])
             
-            # Keep track of how many columns were label encoded
-            le_count += 1
-                
-    print('%d columns were label encoded.' % le_count)
 
-    # one-hot encoding of categorical variables
-    train = pd.get_dummies(train)
-    test = pd.get_dummies(test)
 
-    print('Training Features shape: ', train.shape)
-    print('Testing Features shape: ', test.shape)
+    # # one-hot encoding of categorical variables
+    # train = pd.get_dummies(train)
+    # test = pd.get_dummies(test)
 
-    # -------------------------- ENCODING -------------------------- #
+    # anony model fitting
 
     clf = DecisionTreeClassifier(min_samples_split = 100)
     # features = ['age',  'education_num','race', 'sex',]
     features = ['age', 'workclass',  'education_num',
        'marital_status', 'moving', 'race', 'sex',
         'native_country']
-
-    # le = preprocessing.LabelEncoder()
-    # le.fit(test['income'])
-
-    # x_train = lb.fit_transform(train[features])  
-    # y_train = lb.fit_transform(train['income'])   
-    # x_test = lb.fit_transform(test[features])   
-    # y_test = lb.fit_transform(test['income'])  
 
     x_train = train[features] 
     y_train = train['income']
@@ -417,25 +467,25 @@ def main():
     
     dt = clf.fit(x_train,y_train)
     y_pred = clf.predict(x_test)
-    # y_pred = clf.predict(x_train)
-    # print(y_pred)
-    # accuracy
-    # score = accuracy_score(y_train, y_pred)
-    score = accuracy_score(y_test, y_pred)
-    print('accuracy') 
-    print(score)
 
-    # p, r, f1, s = metrics.precision_recall_fscore_support(y_train, y_pred,
-                                                        #   average="weighted")
-                                                    
+    score = accuracy_score(y_test, y_pred)
+    print('anony accuracy') 
+    print(score)
+                                                 
     p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
                                                           average="weighted")
+
+    print(metrics.confusion_matrix(y_test, y_pred))
+    print("PERFORMANCE FUNC", performance(y_test, y_pred, metric = "f1_score"))
     print('precision')                                                
     print(p)
     print('recall') 
     print(r)
     print('f1') 
     print(f1)
+    score, lower, upper = performance_CI(np.array(y_test), np.array(y_pred) )
+    print('confidence interval')
+    print(score, lower, upper)
 
 
     # male 13685/20017, female 8002/9062
