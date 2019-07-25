@@ -47,15 +47,14 @@ Question 3: Suppose now you have a sensitive dataframe of 10,000 rows named as "
  
 '''
 
-# TODO: Implement function link_attack(df, attack_df, qsi)
+
 def link_attack(df, attack_df, qsi):
     """
-    input:
-    output:
+    input: df: a DataFrame under attack. attack_df: a DataFrame used to attack. qsi: quasi-identifiers
+    output: a link-attack DataFrame that can reveal information if individual can be identified 
+            by quasi-identifiers.
     """
-    print(qsi)
-    merged = pd.merge(df, attack_df, on = qsi)
-    return merged
+# TODO: Implement function link_attack(df, attack_df, qsi)
 
 
 '''
@@ -69,7 +68,7 @@ def is_k_anonymous(k, df, qsi):
     '''
     k: a constant to descide if a data set is k anonymous
     df: the data set of interest
-    qsi: a list of quasi-identifier
+    qsi: a list of quasi-identifiers
     return: True if df is k-anonymous, False if not
     '''
     # TODO: inplement this function here
@@ -152,10 +151,81 @@ def main():
 
     '''
     Question 6: Analize df and the k-anonymous data sets in the main function. What percentage of 
-                male and female has income less than 50k? Does the process of k-anonymous make the 
-                conclusion different? What are the advantages and disadvantages of k-anonymization?
+                male and female has income less than 50k? Build a decision tree model for both data 
+                sets and evaluate their performance. Use ['age', 'workclass',  'education_num',
+                'marital_status', 'occupation', 'race', 'sex','native_country']
+                features to build decision tree models to predict if individual's income is less than
+                50k or more than 50k. Use both the suppressed dataset and k-anonymous 
+                dataset.
     '''
-    # TODO: Write your analysis code here
+    # TODO Part A: Write your analysis code here
+
+
+    # Part B: Use ['age', 'workclass',  'education_num','marital_status', 'occupation', 'race',
+    # 'sex','native_country'] features to build decision tree models to predict if individual's 
+    # income is less than 50k or more than 50k. Use both the suppressed dataset and k-anonymous 
+    #  dataset.
+
+    # ML Pipeline
+
+    # suppressed dataset modeling
+    train, test = train_test_split(suppressed_df, test_size = 0.2)
+
+    # Create a label encoder object for numeric encoding
+    le = LabelEncoder()
+    # Iterate through the columns
+    for col in train:
+        if train[col].dtype == 'object':
+            le.fit(suppressed_df[col])
+            # Transform both training and testing data
+            train[col] = le.transform(train[col])
+            test[col] = le.transform(test[col])
+
+    #  train model
+    clf = DecisionTreeClassifier( max_depth = 7,min_samples_split = 0.01) #f1 = 0.817
+    # clf = DecisionTreeClassifier() # 0.781
+    features = ['age', 'workclass',  'education_num',
+       'marital_status', 'occupation', 'race', 'sex',
+        'native_country']
+
+    x_train = train[features] 
+    y_train = train['income']
+    x_test = test[features]
+    y_test = test['income']
+ 
+    # TODO: fit the decision tree model, then report f1 score for the original dataset
+
+
+
+    # k-anonymized dataset modeling
+    # split data set
+    train, test = train_test_split(anony, test_size = 0.2)
+
+    # Create a label encoder object
+    le = LabelEncoder()
+    # Iterate through the columns
+    for col in train:
+        if train[col].dtype == 'object':
+            # Train on the training data
+            le.fit(anony[col])
+            # Transform both training and testing data
+            train.loc[:,col] = le.transform(train[col])
+            test.loc[:,col] = le.transform(test[col])
+            
+
+
+    clf = DecisionTreeClassifier( max_depth = 7, min_samples_split = 0.01) 
+    features = ['age', 'workclass',  'education_num',
+       'marital_status', 'occupation', 'race', 'sex',
+        'native_country']
+
+    x_train = train[features] 
+    y_train = train['income']
+    x_test = test[features]
+    y_test = test['income']
+
+    # TODO: fit the decision tree model, then report f1 score
+
 
 
 

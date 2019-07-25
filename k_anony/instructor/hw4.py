@@ -13,6 +13,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
 
 
 '''
@@ -47,10 +50,11 @@ Question 3: Suppose now you have a sensitive dataframe of 10,000 rows named as "
 # TODO: Implement function link_attack(df, attack_df, qsi)
 def link_attack(df, attack_df, qsi):
     """
-    input:
-    output:
+    input: df: a DataFrame under attack. attack_df: a DataFrame used to attack. qsi: quasi-identifiers
+    output: a link-attack DataFrame that can reveal information if individual can be identified 
+            by quasi-identifiers.
     """
-    print(qsi)
+
     merged = pd.merge(df, attack_df, on = qsi)
     return merged
 
@@ -66,7 +70,7 @@ def is_k_anonymous(k, df, qsi):
     '''
     k: a constant to descide if a data set is k anonymous
     df: the data set of interest
-    qsi: a list of quasi-identifier
+    qsi: a list of quasi-identifiers
     return: True if df is k-anonymous, False if not
     '''
     df_qsi = df.loc[:3,qsi]
@@ -252,48 +256,39 @@ def main():
 
     '''
     Question 6: Analize df and the k-anonymous data sets in the main function. What percentage of 
-                male and female has income less than 50k? Does the process of k-anonymous make the 
-                conclusion different? What are the advantages and disadvantages of k-anonymization?
+                male and female has income less than 50k? Build a decision tree model for both data 
+                sets and evaluate their performance. Use ['age', 'workclass',  'education_num',
+                'marital_status', 'occupation', 'race', 'sex','native_country']
+                features to build decision tree models to predict if individual's income is less than
+                50k or more than 50k. Use both the suppressed dataset and k-anonymous 
+                dataset.
     '''
     # TODO A: Your analysis code here
-    sex_group = anony.groupby(['sex'])
-    for sex, sex_df in sex_group:
-        print(sex, sex_df.shape[0])
-        print(sex_df.income.value_counts())
-
-        print(sex_df.income.value_counts(normalize = True))
-
-    # male 13664/19995 0.6834, female 7872/8923 0.8822, male~female 1117/1243 , sum = 30161
-
-
-    print('original data!!!!!!!')
+    print('Question 6A original data')
     sex_group2 = suppressed_df.groupby(['sex'])
     for sex, sex_df in sex_group2:
         print(sex, sex_df.shape[0])
         print(sex_df.income.value_counts( ))
-    # print("total data")
-    # print(anony.income.value_counts())
-    # print(suppressed_df.income.value_counts())
-    # print(df.income.value_counts())
+    # male 13982/20378 0.6861, female 8670/9782 0.8863 sum = 30160
+    print('Question 6A k-anonymous data')
+    sex_group = anony.groupby(['sex'])
+    for sex, sex_df in sex_group:
+        print(sex, sex_df.shape[0])
+        print(sex_df.income.value_counts())
+        print(sex_df.income.value_counts(normalize = True))
+    # male 13664/19995 0.6834, female 7872/8923 0.8822, male~female 1117/1243 , sum = 30161
 
-        # print(sex_df.income.value_counts( normalize= True))
-
-     # male 13982/20378 0.6861, female 8670/9782 0.8863 sum = 30160
-
-    # print(df.isnull().sum() )
-    # print(df.describe() )
-    # print(anony.describe())
+    # Part B: Use ['age', 'workclass',  'education_num','marital_status', 'occupation', 'race',
+    # 'sex','native_country'] features to build decision tree models to predict if individual's 
+    # income is less than 50k or more than 50k. Use both the suppressed dataset and k-anonymous 
+    #  dataset.
 
     # ML Pipeline
+    # split suppressed dataset to train and test parts
+    train, test = train_test_split(suppressed_df, test_size = 0.2)
 
-    train, test = train_test_split(suppressed_df, test_size = 0.15)
-    # suppressed data set numeric encoding
-
-    # Create a label encoder object
+    # Create a label encoder object for numeric encoding
     le = LabelEncoder()
-
-    print(suppressed_df.income.value_counts())
-
     # Iterate through the columns
     for col in train:
         if train[col].dtype == 'object':
@@ -304,55 +299,127 @@ def main():
 
     print(train.income.value_counts())
 
-    # # one-hot encoding of categorical variables
-    # train = pd.get_dummies(train)
-    # test = pd.get_dummies(test)
-
-    print('Training Features shape: ', train.shape)
-    print('Testing Features shape: ', test.shape)
-
     #  train model
-
-    clf = DecisionTreeClassifier(min_samples_split = 100)
-    # features = ['age',  'education_num','race', 'sex',]
+    clf = DecisionTreeClassifier( max_depth = 7,min_samples_split = 0.01) #f1 = 0.817
+    # clf = DecisionTreeClassifier() # 0.781
     features = ['age', 'workclass',  'education_num',
        'marital_status', 'occupation', 'race', 'sex',
         'native_country']
-
 
     x_train = train[features] 
     y_train = train['income']
     x_test = test[features]
     y_test = test['income']
  
-    # TODO: B the performance of decision tree for the original dataset
+    # TODO: fit the decision tree model, then report f1 score for the original dataset
     dt = clf.fit(x_train,y_train)
-    y_pred = clf.predict(x_test)
-
-    score = metrics.accuracy_score(y_test, y_pred)
-    print('suppressed accuracy') 
-    print(score)
-                                                    
+    y_pred = clf.predict(x_test)                                               
     p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
                                                           average="weighted")
-
-
-    print(metrics.confusion_matrix(y_test, y_pred))
-    print('precision')                                                
-    print(p)
-    print('recall') 
-    print(r)
-    print('f1') 
+    print('f1 score:') 
     print(f1)
 
-    print('confidence interval')
+
+    # max_features = list(range(1,train.shape[1]))
+    # train_results = []
+    # test_results = []
+    # for max_feature in max_features:
+        
+    #     dt = DecisionTreeClassifier(max_features=max_feature)
+    #     dt.fit(x_train, y_train)
+    #     train_pred = dt.predict(x_train)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     train_results.append(roc_auc)
+    #     y_pred = dt.predict(x_test)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     test_results.append(roc_auc)
+
+    # from matplotlib.legend_handler import HandlerLine2D
+    # line1, = plt.plot(max_features, train_results, 'b', label='Train AUC')
+    # line2, = plt.plot(max_features, test_results, 'r', label='Test AUC')
+    # plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    # plt.ylabel('AUC score')
+    # plt.xlabel('max features')
+    # plt.show()
+
+    # min_samples_splits = np.linspace(0.1, 1.0, 10, endpoint=True)
+    # train_results = []
+    # test_results = []
+    # for min_samples_split in min_samples_splits:
+
+    #     dt = DecisionTreeClassifier(min_samples_split=min_samples_split)
+    #     dt.fit(x_train, y_train)
+    #     train_pred = dt.predict(x_train)
+    #     false_positive_rate, true_positive_rate, thresholds =    roc_curve(y_train, train_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     train_results.append(roc_auc)
+    #     y_pred = dt.predict(x_test)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     test_results.append(roc_auc)
+
+    # from matplotlib.legend_handler import HandlerLine2D
+    # line1, = plt.plot(min_samples_splits, train_results, 'b', label='Train AUC')
+    # line2, = plt.plot(min_samples_splits, test_results, 'r', label='Test AUC')
+    # plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    # plt.ylabel('AUC score')
+    # plt.xlabel('min samples split')
+    # plt.show()
+
+    # false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+    # roc_auc = auc(false_positive_rate, true_positive_rate)
+
+
+    # max_depths = np.linspace(1, 32, 32, endpoint=True)
+    # train_results = []
+    # train_f1 = []
+    # test_results = []
+    # test_f1 = []
+    # for max_depth in max_depths:
+    #     dt = DecisionTreeClassifier(max_depth=max_depth)
+    #     dt.fit(x_train, y_train)
+    #     train_pred = dt.predict(x_train)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     train_results.append(roc_auc)
+        
+    #     p, r, f1, s = metrics.precision_recall_fscore_support(y_train, train_pred,
+    #                                                       average="weighted")
+    #     train_f1.append(f1)
+    #     # Add auc score to previous train results
+        
+    #     y_pred = dt.predict(x_test)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+
+    #     p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
+    #                                                       average="weighted")
+    #     # Add auc score to previous test results
+    #     test_results.append(roc_auc)
+    #     test_f1.append(f1)
+    #     # print(test_f1)
+    #     # print(train_f1)
+    # from matplotlib.legend_handler import HandlerLine2D
+    # line1, = plt.plot(max_depths, train_results, 'b', label="Train AUC")
+    # line2, = plt.plot(max_depths, test_results, 'r', label="Test AUC")
+    # plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    # plt.ylabel('AUC score')
+    # plt.xlabel('Tree depth')
+    # plt.show() # 8 max_depth = 8
+    # line3, = plt.plot(max_depths, train_f1, 'b', label="Train f1")
+    # line4, = plt.plot(max_depths, test_f1, 'r', label="Test f1")
+    # plt.legend(handler_map={line3: HandlerLine2D(numpoints=2)})
+    # plt.ylabel('f1score')
+    # plt.xlabel('Tree depth')
+    # plt.show() # max depth = 10
+
     # print(score, lower, upper)
 
-    #   k-anonymized data
-
-    train, test = train_test_split(anony, test_size = 0.15)
-
-    # anony data numerical encoding
+    # k-anonymized data set modeling
+    # split data set
+    train, test = train_test_split(anony, test_size = 0.2)
 
     # Create a label encoder object
     le = LabelEncoder()
@@ -363,21 +430,16 @@ def main():
         if train[col].dtype == 'object':
             # Train on the training data
             le.fit(anony[col])
-
             # Transform both training and testing data
             train.loc[:,col] = le.transform(train[col])
             test.loc[:,col] = le.transform(test[col])
             
-
-
     # # one-hot encoding of categorical variables
     # train = pd.get_dummies(train)
     # test = pd.get_dummies(test)
-
     # anony model fitting
 
-    clf = DecisionTreeClassifier(min_samples_split = 100)
-    # features = ['age',  'education_num','race', 'sex',]
+    clf = DecisionTreeClassifier( max_depth = 7, min_samples_split = 0.01) # f1 = 0.799
     features = ['age', 'workclass',  'education_num',
        'marital_status', 'occupation', 'race', 'sex',
         'native_country']
@@ -387,46 +449,17 @@ def main():
     x_test = test[features]
     y_test = test['income']
 
-    # TODO: B the performance of decision tree for k-anonymous dataset
+    # TODO: fit the decision tree model, then report f1 score
     dt = clf.fit(x_train,y_train)
-    y_pred = clf.predict(x_test)
-
-    # score = accuracy_score(y_test, y_pred)
-    # print('anony accuracy') 
-    # print(score)
-                                                 
+    y_pred = clf.predict(x_test)                                            
     p, r, f1, s = metrics.precision_recall_fscore_support(y_test, y_pred,
                                                           average="weighted")
 
     print(metrics.confusion_matrix(y_test, y_pred))
 
-    print('precision')                                                
-    print(p)
-    print('recall') 
-    print(r)
-    print('f1') 
+    print('k-anonymous data set decision tree f1') 
     print(f1)
 
-    # print('confidence interval')
-    # print(score, lower, upper)
-
-    print(df.head())
-
-
-    # male 13685/20017, female 8002/9062
-    # print('race anony data!!!!!!!')
-    # race_group = anony.groupby(['race'])
-    # for race, race_df in race_group:
-    #     print(race)
-    #     print(race_df.income.value_counts())
-
-    # # male 13685/20017, female 8002/9062
-
-    # print('race original data!!!!!!!')
-    # race_group2 = df.groupby(['race'])
-    # for race, race_df in race_group:
-    #     print(race)
-    #     print(race_df.describe())
 
 #     # test 1
 #     assert np.array_equal(df.columns, ['age', 'workclass', 
