@@ -25,7 +25,7 @@ Question 2: Your supervisor believes the information in ['fnlwgt', 'education', 
             variable 'suppressed' and save it as 'suppressed.csv' without a header, without index. 
             How many rows are unique in the 'suppressed' data set? 
 '''
-# TODO: Write a function suppression() which input a DataFrame df, and a list of column names 
+# TODO: Write a function suppress() which input a DataFrame df, and a list of column names 
 #       to drop these columns from df. Then save the new data set under data directory as 
 #       'suppressed.csv' without a header, without index.
 
@@ -47,16 +47,35 @@ Question 3: Suppose now you have a sensitive dataframe of 10,000 rows named as "
  
 '''
 
-# TODO: Implement function link_attack(df, attack_df, qsi)
+# TODO: Implement function link_attack(df, attack_df, qsi) 29293?
 def link_attack(df, attack_df, qsi):
     """
     input: df: a DataFrame under attack. attack_df: a DataFrame used to attack. qsi: quasi-identifiers
     output: a link-attack DataFrame that can reveal information if individual can be identified 
             by quasi-identifiers.
     """
-
+    # df.drop_duplicates(keep = False, inplace=True)
+    # attack_df.drop_duplicates(keep = False, inplace=True)
     merged = pd.merge(df, attack_df, on = qsi)
     return merged
+
+    # df_qsi = df[qsi]
+    # attack_qsi = attack_df[qsi]
+    # res = pd.DataFrame()
+    # for index_df, row_df in df_qsi.iterrows():
+    #     for index_attack, row_attack in attack_qsi.iterrows():
+    #         list_df = list(row_df)
+    #         list_attack = list(row_attack)
+    #         count = 0
+    #         for index in range(len(list_attack)):
+    #             possible_values = str(list_df[index]).split("~")
+    #             if list_attack[index] in possible_values:
+    #                 count += 1
+    #         if count == len(list_df):
+    #             res.append(pd.merge(row_df, row_attack))
+    # return res
+
+
 
 
 '''
@@ -119,59 +138,44 @@ this data set is not 2 anonymous with this quasi-identifers
 
 def main():
 
-    PATH = os.path.join('data', 'adult.data')
-    # PATH = os.path.join('data', 'monAdult.csv'
-    df = pd.read_csv(PATH)
+    FILE = os.path.join('data', 'adult.csv')
+    missing_values = ["n/a", "na", "--", "unknown", " ?","", ' ']
+
+    df = pd.read_csv(FILE, na_values=missing_values)
+
+    #========================================
+    # Part 1A: TODO How many rows and columns are there in this data set?
+    print('number of rows:', df.shape[0]) # 32560
+    print('number of features:', df.shape[1]) # 16, include index
+    #========================================
+
     
 
-    '''
-    Question1:  In the main function of hw4.py, use pandas functions to print out DataFrame information 
-                and answer questions in your writeup pdf file.
+    #========================================
+    # TODO: 1C: Remove examples with missing values
 
-                Is there any personal Identifiable information in the data set?
-                Is there any quasi-identifier information according to Sweeney's defination?
-                Can you find possible quasi-identifier among the columns? Why are they?
-
-                Write some codes after TODO. Then write your response in a seperate file and save it as hw4.pdf.
-    '''
- 
-    # TODO:     A. How many rows are there in this data set?
-    print('there are', df.shape[0], 'rows in df~~~')
-    '''
-    there are 32560 rows in the data set  
-    '''
-
-    # TODO      C. Write some code to explore the DataFrame.
-    #           Can you find possible quasi-identifier among the columns? 
-    #           Why do you think they can be quasi-identifier?
+    df.dropna(axis=0, how='any', inplace=True)
+    print('number of non missing value rows: ', df.shape[0]) # 30161
+    print(df.head())
+    #========================================
 
 
-    # print(f.age.value_counts())
-    # print(f.fnlwgt.value_counts())
-    # print(f.native_country.value_counts())
-    '''
-    there is no pii : https://piwik.pro/blog/what-is-pii-personal-data/
-    sex is quasi-identifier in Sweeny's defination
-    age, fnlwgt, native_country. because value_counts have 1, so more likely to id people
-    '''
-
-    """
-    Question 2 Data preprocess and Feature Engineering
-
-    """
-    missing_values = ["n/a", "na", "--", "unknown", " ?","", ' ']
-    # TODO: A. Data clean
-    df = pd.read_csv(PATH, na_values = missing_values)
-    df.dropna(axis = 0, how = 'any', inplace = True)
-    print('there are', df.shape[0], 'rows in cleaned df~~~')
-    # -> 30161 after drop na
+    ATTACK_PATH = os.path.join('data', 'tinyAttack.csv')
+    link_attack_df = pd.read_csv(ATTACK_PATH)
+    print(link_attack_df.head())
+    qsi = ['age','sex', 'native_country']
+    # TODO: 2B Run link_attack you implemented above in the main function with the suppressed 
+    #       DataFrame, the attack DataFrame. Write code to find how many people can you re-identify? 
+    merged_df = link_attack(df, link_attack_df,  qsi )
+    print(merged_df.head())
+    print(merged_df.shape,'!!!!!!!!!!!!!!')
 
     # TODO:     B. Add column names to this data set. The list of column names are: ['age', 'workclass', 
     #           'fnlwgt', 'education', 'education_num', 'marital_status', 'moving', 'relationship', 
     #            # 'race', 'sex', 'capital_gain', 'capital_loss', 'hours_per_week', 'native_country','income']
-    df.columns = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
-    'marital_status', 'occupation', 'relationship', 'race', 'sex',
-    'capital_gain','capital_loss', 'hours_per_week', 'native_country','income']
+    # df.columns = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
+    # 'marital_status', 'occupation', 'relationship', 'race', 'sex',
+    # 'capital_gain','capital_loss', 'hours_per_week', 'native_country','income']
     
     # TODO:C run suppression() function you implemented with the inputs as the DataFrame df from question 1,
     # and the column names mentioned above. 
@@ -190,18 +194,7 @@ def main():
     15512 unique
     '''
 
-    """
-    Question 3 b
-    """
-    ATTACK_PATH = os.path.join('data', 'link_attack.csv')
 
-    link_attack_df = pd.read_csv(ATTACK_PATH)
-    qsi = ['age','sex', 'native_country']
-    # TODO: B Run link_attack you implemented above in the main function with the suppressed 
-    #       DataFrame, the attack DataFrame. Write code to find how many people can you re-identify? 
-    #       You can use ['age',  'sex, 'native_country'] as the quasi-identifiers.
-    merged_df = link_attack(suppressed_df, link_attack_df,  qsi )
-    print()
 
     merged_unique = merged_df.drop_duplicates(['age','sex', 'native_country'], keep = False)
     # print(merged_unique.head())
@@ -300,7 +293,7 @@ def main():
     print(train.income.value_counts())
 
     #  train model
-    clf = DecisionTreeClassifier( max_depth = 7,min_samples_split = 0.01) #f1 = 0.817
+    clf = DecisionTreeClassifier(max_depth = 7, min_samples_split = 0.01) #f1 = 0.817
     # clf = DecisionTreeClassifier() # 0.781
     features = ['age', 'workclass',  'education_num',
        'marital_status', 'occupation', 'race', 'sex',
