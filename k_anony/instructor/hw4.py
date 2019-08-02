@@ -18,46 +18,22 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
 
-'''
-Question 2: Your supervisor believes the information in ['fnlwgt', 'education', 'relationship', 
-            'capital_gain', 'capital_loss', 'hours_per_week'] are not necessary for your analysis.
-            Use suppression technique to de-idenitify this data set. Name the new data frame 
-            variable 'suppressed' and save it as 'suppressed.csv' without a header, without index. 
-            How many rows are unique in the 'suppressed' data set? 
-'''
-# TODO: Write a function suppress() which input a DataFrame df, and a list of column names 
-#       to drop these columns from df. Then save the new data set under data directory as 
-#       'suppressed.csv' without a header, without index.
-
-def suppression(df, column_names):
-    """
-    input: df, a DataFrame to suppress. column_names: a list of strings
-    output: the path where 'suppressed.csv' is saved
-    """
-    suppressed = df.drop(columns = column_names)
-    path = os.path.join('data', 'suppressed.csv')
-    suppressed.to_csv(path, header = False, index = False)
-    return path
-
-'''
-Question 3: Suppose now you have a sensitive dataframe of 10,000 rows named as "link_attack.csv",
-            which contains personal identifiable information. Take a look at the head of this attack data,
-            perform a link attack and to re-identify people's name, ssn, race, and salary. You can use 
-            ['age',  'sex, 'native_country'] as quasi-identifier. How many people can you identify?
- 
-'''
-
-# TODO: Implement function link_attack(df, attack_df, qsi) 29293?
 def link_attack(df, attack_df, qsi):
     """
     input: df: a DataFrame under attack. attack_df: a DataFrame used to attack. qsi: quasi-identifiers
     output: a link-attack DataFrame that can reveal information if individual can be identified 
             by quasi-identifiers.
     """
-    # df.drop_duplicates(keep = False, inplace=True)
-    # attack_df.drop_duplicates(keep = False, inplace=True)
-    merged = pd.merge(df, attack_df, on = qsi)
+    #========================================
+    # TODO: 2A: Implement this funciton
+    df.drop_duplicates(keep = False, inplace=True, subset = qsi)
+    attack_df.drop_duplicates(keep = False, inplace=True , subset = qsi)
+    # print(df.shape)
+    # print(attack_df.shape)
+    
+    merged = pd.merge(df, attack_df, how = "inner", on = qsi)
     return merged
+    #========================================
 
     # df_qsi = df[qsi]
     # attack_qsi = attack_df[qsi]
@@ -74,6 +50,27 @@ def link_attack(df, attack_df, qsi):
     #         if count == len(list_df):
     #             res.append(pd.merge(row_df, row_attack))
     # return res
+
+def suppress(df, column_names):
+    """
+    input: df, a DataFrame to suppress. column_names: a list of strings
+    output: a suppressed DataFrame
+    """
+    #========================================
+    # TODO: 2A: Implement this funciton
+    suppressed = df.drop(columns = column_names)
+    return suppressed
+    #========================================
+
+'''
+Question 3: Suppose now you have a sensitive dataframe of 10,000 rows named as "link_attack.csv",
+            which contains personal identifiable information. Take a look at the head of this attack data,
+            perform a link attack and to re-identify people's name, ssn, race, and salary. You can use 
+            ['age',  'sex, 'native_country'] as quasi-identifier. How many people can you identify?
+ 
+'''
+
+
 
 
 
@@ -152,8 +149,7 @@ def main():
     
 
     #========================================
-    # TODO: 1C: Remove examples with missing values
-
+    # Part 1C TODO: Remove examples with missing values
     df.dropna(axis=0, how='any', inplace=True)
     print('number of non missing value rows: ', df.shape[0]) # 30161
     print(df.head())
@@ -162,13 +158,12 @@ def main():
 
     ATTACK_PATH = os.path.join('data', 'tinyAttack.csv')
     link_attack_df = pd.read_csv(ATTACK_PATH)
-    print(link_attack_df.head())
     qsi = ['age','sex', 'native_country']
-    # TODO: 2B Run link_attack you implemented above in the main function with the suppressed 
-    #       DataFrame, the attack DataFrame. Write code to find how many people can you re-identify? 
+    #========================================
+    # Part 2B TODO: Perform link attack with link_attack_df on df
     merged_df = link_attack(df, link_attack_df,  qsi )
-    print(merged_df.head())
-    print(merged_df.shape,'!!!!!!!!!!!!!!')
+    print(merged_df.shape[0],' rows are revealed')
+    #========================================
 
     # TODO:     B. Add column names to this data set. The list of column names are: ['age', 'workclass', 
     #           'fnlwgt', 'education', 'education_num', 'marital_status', 'moving', 'relationship', 
@@ -179,12 +174,20 @@ def main():
     
     # TODO:C run suppression() function you implemented with the inputs as the DataFrame df from question 1,
     # and the column names mentioned above. 
-    drop_column_names = ['fnlwgt', 'education', 'relationship', 'capital_gain', 'capital_loss', 'hours_per_week']
-    suppressed_path = suppression(df, drop_column_names)
-    suppressed_df = pd.read_csv(suppressed_path)
-    suppressed_df.columns = ['age', 'workclass',  'education_num',
-       'marital_status', 'occupation', 'race', 'sex',
-        'native_country','income']
+    drop_column_names = ['fnlwgt', 'education', 'relationship', 'capital_gain',
+                         'capital_loss', 'hours_per_week','sex']
+    qsi = ['age', 'native_country']
+    #========================================
+    # Part 3B TODO: Perform suppression on df
+    suppressed_df = suppress(df, drop_column_names)
+    SUPPRESSED_FILE = os.path.join('data', 'suppressed.csv')
+    suppressed_df.to_csv(SUPPRESSED_FILE)
+    # suppressed_df.columns = ['age', 'workclass',  'education_num',
+    #    'marital_status', 'occupation', 'race', 'sex',
+    #     'native_country','income']
+    suppressed_attack = link_attack(suppressed_df, link_attack_df, qsi )
+    print(suppressed_attack.shape[0], " rows for suppressed data set are revealed")
+    #========================================
     # print(df.shape[0], suppressed_df.shape[0]) # 30161 30160
     # TODO: D How many rows are unique in the suppressed data set? 
     unique = suppressed_df.drop_duplicates(keep = False)
